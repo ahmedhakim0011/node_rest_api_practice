@@ -1,9 +1,13 @@
 const User = require("../models/user");
+const bcrypt = require('bcrypt');
+
+const { user } = require("../routes/user");
+const { setUser } = require("../services/auth");
 
 
-async function handleCreateUser(req, res) {
-    const { first_name, last_name, email, gender, jobTitle } = req.body;
-    if (!first_name || !last_name || !email || !gender || !jobTitle) {
+async function handleUserSignup(req, res) {
+    const { first_name, last_name, email, password, gender, jobTitle } = req.body;
+    if (!first_name || !last_name || !email || !password || !gender || !jobTitle) {
         return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -12,17 +16,42 @@ async function handleCreateUser(req, res) {
         if (existingUser) {
             return res.status(200).json({ message: "Email is already in use" });
         }
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         const result = await User.create({
             firstName: first_name,
             lastName: last_name,
             email: email,
+            password: hashedPassword,
             gender: gender,
             jobTitle: jobTitle
         });
 
         console.log("result", result);
         return res.status(200).json({ status: true, message: "User created successfully", data: result });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
+// login user
+async function handleUserLogin(req, res) {
+    const { email, password, } = req.body;
+    if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required" });
+    }
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ message: "Invalid credentials" });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: "Invalid credentials" });
+        }
+        const token = setUser(user);
+        console.log("token", token);
+        return res.status(200).json({ status: true, message: "User login successfully", data: { user, token } });
     } catch (error) {
         return res.status(500).json({ message: error.message });
     }
@@ -73,7 +102,8 @@ async function handleUpdateUserById(req, res) {
 }
 
 module.exports = {
-    handleCreateUser,
+    handleUserSignup,
+    handleUserLogin,
     handleGetAllUsers,
     handleGetAllUsersById,
     handleUpdateUserById,

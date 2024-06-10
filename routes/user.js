@@ -1,13 +1,18 @@
 const express = require("express");
 const User = require("../models/user");
-const { handleCreateUser, handleGetAllUsers, handleGetAllUsersById, handleUpdateUserById, handleDeleteUserById } = require("../controllers/user");
+const { handleUserSignup, handleUserLogin, handleGetAllUsers, handleGetAllUsersById, handleUpdateUserById, handleDeleteUserById } = require("../controllers/user");
+const {handleFollowUser} = require('../controllers/follow_unfollow');
 const router = express.Router();
 
 
 
-router.route(`/`)
-    .get(handleGetAllUsers)
-    .post(handleCreateUser);
+router
+    .get(`/`, handleGetAllUsers);
+
+router.post(`/signup`, handleUserSignup);
+router.post(`/login`, handleUserLogin);
+router.post(`/follow`, handleFollowUser);
+
 
 router.route(`/:id`)
     .get(handleGetAllUsersById)
