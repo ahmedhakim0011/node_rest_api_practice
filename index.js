@@ -1,5 +1,7 @@
 const express = require(`express`);
 const { connectMongoDb } = require("./connection");
+
+// middelwares
 const { logReqRes } = require("./middelwares");
 
 const userRouter = require("./routes/user");
@@ -19,7 +21,7 @@ app.use(logReqRes("log.txt"));
 
 // ROUTES
 app.use("/api/users", userRouter);
-app.use(postRouter);
+app.use( postRouter);
 
 
 app.listen(PORT, () => console.log(`server started at this PORT ${PORT}`));

@@ -63,5 +63,5 @@ async function handleDeletePost(req, res) {
 module.exports = {
     handleCreatePost,
     handleGetPostByID,
-    handleDeletePost
+    handleDeletePost,
 }

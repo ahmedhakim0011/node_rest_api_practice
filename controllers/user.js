@@ -1,13 +1,14 @@
 const User = require("../models/user");
+const {getPostByUserId} = require("../models/post");
 const bcrypt = require('bcrypt');
 
-const { user } = require("../routes/user");
+const { user, use } = require("../routes/user");
 const { setUser } = require("../services/auth");
 
 
 async function handleUserSignup(req, res) {
-    const { first_name, last_name, email, password, gender, jobTitle } = req.body;
-    if (!first_name || !last_name || !email || !password || !gender || !jobTitle) {
+    const { first_name, last_name, email, password, role, gender, jobTitle } = req.body;
+    if (!first_name || !last_name || !email || !password || !role || !gender || !jobTitle) {
         return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -23,6 +24,7 @@ async function handleUserSignup(req, res) {
             lastName: last_name,
             email: email,
             password: hashedPassword,
+            role: role,
             gender: gender,
             jobTitle: jobTitle
         });
@@ -84,13 +86,12 @@ async function handleDeleteUserById(req, res) {
 }
 
 async function handleUpdateUserById(req, res) {
-    const { first_name, last_name, email, gender, jobTitle } = req.body;
+    const { first_name, last_name, gender, jobTitle } = req.body;
 
 
     const user = await User.findByIdAndUpdate(req.params.id, {
         firstName: first_name,
         lastName: last_name,
-        email: email,
         gender: gender,
         jobTitle: jobTitle
     }, { new: true });
@@ -101,6 +102,29 @@ async function handleUpdateUserById(req, res) {
 
 }
 
+async function handleGetUserProfile(req, res) {
+    try {
+        console.log("handleGetUserProfile", req.user._id);
+        const userId = req.user._id;
+        // console.log("handleGetUserProfile", req.user._id);
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const userPosts = await getPostByUserId(userId).populate("userID", "_id")
+        const userProfile = {
+            user: user,
+            posts: userPosts
+        }
+        return res.status(200).json({ status: true, data: userProfile, message: "profile fetched successfully" });
+
+
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
 module.exports = {
     handleUserSignup,
     handleUserLogin,
@@ -108,4 +132,5 @@ module.exports = {
     handleGetAllUsersById,
     handleUpdateUserById,
     handleDeleteUserById,
+    handleGetUserProfile
 }
