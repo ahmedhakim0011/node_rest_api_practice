@@ -112,7 +112,7 @@ async function handleGetUserProfile(req, res) {
             return res.status(404).json({ message: "User not found" });
         }
 
-        const userPosts = await getPostByUserId(userId).populate("userID", "_id")
+        const userPosts = await getPostByUserId(userId).select('-userID')
         const userProfile = {
             user: user,
             posts: userPosts
