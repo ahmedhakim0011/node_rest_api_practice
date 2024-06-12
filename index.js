@@ -1,5 +1,6 @@
 const express = require(`express`);
 const { connectMongoDb } = require("./connection");
+const bodyParser     = require("body-parser");
 
 // middelwares
 const { logReqRes } = require("./middelwares");
@@ -17,6 +18,8 @@ connectMongoDb("mongodb+srv://ahmedhakim:Hakim1234@cluster0.qzfvcss.mongodb.net/
 
 // Middelware
 app.use(express.urlencoded({ extended: false }));
+app.use('/uploads', express.static('uploads'));
+
 app.use(logReqRes("log.txt"));
 
 // ROUTES

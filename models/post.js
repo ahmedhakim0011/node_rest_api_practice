@@ -23,6 +23,9 @@ const postSchema = new mongoose.Schema({
 const Post = mongoose.model("post", postSchema);
 // Post.find({ userID: userId }).populate("userID");
 exports.createPost = (query) => Post.create(query);
+exports.getAllPosts = (followingIds) => {
+    return Post.find({ userID: { $in: followingIds } });
+}
 
 exports.getPostByID = (id) => Post.findById(id);
 exports.getPostByUserId = (userId) => {
